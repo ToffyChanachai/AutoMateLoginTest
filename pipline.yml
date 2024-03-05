@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Check out the source code from SCM
+                checkout scm
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Assuming 'index.html' is located at the root of your project
+                // And you have SSH access to your web server
+                sshPublisher(
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: "your-web-server-ssh-credentials-id",
+                            transfers: [
+                                sshTransfer(
+                                    sourceFiles: "index.html", // Specify the HTML file to deploy
+                                    remoteDirectory: "/var/www/html", // Or your web server's HTML root directory
+                                    execCommand: "sudo systemctl restart nginx" // Or your web server's restart command
+                                )
+                            ]
+                        )
+                    ]
+                )
+            }
+        }
+    }
+}
